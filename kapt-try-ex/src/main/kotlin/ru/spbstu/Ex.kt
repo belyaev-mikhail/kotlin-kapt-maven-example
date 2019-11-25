@@ -35,7 +35,7 @@ object Obj
 sealed class Expr
 
 @TestAnnotation
-data class Var(val name: String)
+data class Var<S: CharSequence>(val name: S)
 
 @TestAnnotation
 data class Const(val value: Int)
