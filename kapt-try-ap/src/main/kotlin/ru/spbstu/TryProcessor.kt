@@ -60,21 +60,17 @@ class TestAnnotationProcessor : AbstractProcessor() {
 
             primaryFields.map { field ->
                 val escapedFieldType = field.type.subst(tyVarMapping)
+                val jvmName = elem.simpleName.toString().decapitalize() + field.name.capitalize()
                 PropertySpec
-                        .builder(
-                                field.name, lenser.parameterizedBy(s, escapedFieldType)
-                        )
+                        .builder(field.name, lenser.parameterizedBy(s, escapedFieldType))
                         .addTypeVariable(s)
                         .addTypeVariables(escapedTyVars)
-                        .receiver(
-                                lenser
-                                        .parameterizedBy(s, kname.plusParameters(escapedTyVars))
-                        )
+                        .receiver(lenser.parameterizedBy(s, kname.plusParameters(escapedTyVars)))
                         .addAnnotation(
                                 AnnotationSpec
                                         .builder(JvmName::class)
                                         .useSiteTarget(AnnotationSpec.UseSiteTarget.GET)
-                                        .addMember("%S", "${elem.simpleName.toString().decapitalize()}${field.name.capitalize()}")
+                                        .addMember("%S", jvmName)
                                         .build()
                         )
                         .getter {
