@@ -56,16 +56,20 @@ class TestAnnotationProcessor : AbstractProcessor() {
             val escapedTyVars = poet.typeVariables.map {
                 TypeVariableName.invoke("Bu" + it.name, bounds = it.bounds)
             }
+            val parameterizedKName = when {
+                escapedTyVars.isEmpty() -> kname
+                else -> kname.parameterizedBy(escapedTyVars)
+            }
             val tyVarMapping = poet.typeVariables.zip(escapedTyVars).toMap()
 
             primaryFields.map { field ->
                 val escapedFieldType = field.type.subst(tyVarMapping)
-                val jvmName = elem.simpleName.toString().decapitalize() + field.name.capitalize()
+                val jvmName = kname.simpleName.decapitalize() + field.name.capitalize()
                 PropertySpec
                         .builder(field.name, lenser.parameterizedBy(s, escapedFieldType))
                         .addTypeVariable(s)
                         .addTypeVariables(escapedTyVars)
-                        .receiver(lenser.parameterizedBy(s, kname.plusParameters(escapedTyVars)))
+                        .receiver(lenser.parameterizedBy(s, parameterizedKName))
                         .addAnnotation(
                                 AnnotationSpec
                                         .builder(JvmName::class)
